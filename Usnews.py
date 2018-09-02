@@ -24,6 +24,8 @@ ranks1 = []
 names = []
 locations = []
 uurls = []
+umajors = []
+usettings = []
 
 for url in urls:
     print("shel1")
@@ -41,9 +43,25 @@ for url in urls:
         for uurl in college.findAll('a', href=True):
             #print("uurl", uurl)
             if( "best-colleges" in uurl['href']):
-                uurls.append("http://colleges.usnews.rankingsandreviews.com"+str.strip(uurl['href']))
-                print( uurl.text, uurl['href'] )
-        
+                uurl1="http://colleges.usnews.rankingsandreviews.com"+str.strip(uurl['href'])
+                majors = []
+                settings = []
+                uurls.append(uurl1)
+                print( uurl['href'] )
+ #parsing each university page               
+                r1 = requests.get(uurl1, headers={'User-Agent':'test'})
+                soup1 = BeautifulSoup(r1.text, "lxml")
+                #print("HAHAHA", soup1.encode('utf-8'))
+                for major in soup1.findAll( 'span', attrs={'class': 'flex-medium text-muted'}):
+                    #print("major", major.text)
+                    majors.append(str.strip(major.text))
+                print( "majors", majors)
+                umajors.append(majors)
+                for setting in soup1.findAll('span', attrs={'class': 'heading-small text-black text-tight block-flush display-block-for-large-up'}):
+                    settings.append(str.strip(setting.text))
+                print( "settings", settings)
+                usettings.append(settings)
+#end parsing each university page                
     for location in soup.findAll('div', attrs={'class': 'text-small block-tight'}):
         locations.append(str.strip(location.text))
         #print ("locations", location.text)
@@ -53,7 +71,7 @@ for url in urls:
 #            uurl.append(str.strip(location.text))
 #            print( uurl.text, uurl['href'] )
 
-print( len(ranks1), len(names), len(locations), len(uurls))
+print( len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings))
 ranks2 = range(203, 281)
 ranks = ranks1+list(ranks2)
 print(ranks)
@@ -64,6 +82,13 @@ for i in range(len(ranks1)):
     records.append(names[i].encode('utf-8'))
     records.append(locations[i])
     records.append(uurls[i])
+    records.append(umajors[i])
+    records.append(usettings[i][0])
+    records.append(usettings[i][1])
+    records.append(usettings[i][2])
+    records.append(usettings[i][3])
+    records.append(usettings[i][4])
+    records.append(usettings[i][5])
     print(records)
     writer.writerow(records)
     records = []
