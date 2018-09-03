@@ -4,7 +4,7 @@ import re
 import csv
 from collections import defaultdict
 
-csv_file = open('ranking_university_USnews.csv', 'w', newline='')
+csv_file = open('../temp/USnewsRanking.csv', 'w', newline='')
 writer = csv.writer(csv_file)
 
 
