@@ -8,11 +8,12 @@ csv_file = open('../temp/USnewsRanking.csv', 'w', newline='')
 writer = csv.writer(csv_file)
 
 
-urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table',\
-        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
-        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
-        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
-        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table']
+urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table']
+# ,\
+        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
+        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
+        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
+        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table']
 
 rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate', \
                 'BioMed'        : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate-biological-biomedical', \
@@ -29,7 +30,9 @@ rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings
                 'BusRE'         : 'https://www.usnews.com/best-colleges/rankings/business-real-estate',\
                 'BusSupply'     : 'https://www.usnews.com/best-colleges/rankings/business-supply-chain-management-logistics',
                 'LiberalArts'   : 'https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges'}
-columns = ['University','Univ Rank', 'Locations', 'URLs', 'Top Majors', 'Sector', 'Founding', 'Religion', 'Calendar', 'Setting', 'Endorsement'] 
+
+columns = ['University','Univ Rank', 'Locations', 'URLs', 'Top Majors', 'Sector', 'Founding', 'Religion', 'Calendar', 'Setting', 'Endorsement', 'Acceptance Rate']
+ 
 defaultRanking = 888
 
 d = defaultdict(list)
@@ -39,6 +42,7 @@ locations = []
 uurls = []
 umajors = []
 usettings = []
+uacceptances = []
 
 #national rankings
 for url in urls:
@@ -59,6 +63,7 @@ for url in urls:
 #parsing each university page               
                 majors = []
                 settings = []
+                acceptances = []
                 r1 = requests.get(uurl1, headers={'User-Agent':'test'})
                 soup1 = BeautifulSoup(r1.text, "lxml")
                 for major in soup1.findAll( 'span', attrs={'class': 'flex-medium text-muted'}):
@@ -67,6 +72,9 @@ for url in urls:
                 for setting in soup1.findAll('span', attrs={'class': 'heading-small text-black text-tight block-flush display-block-for-large-up'}):
                     settings.append(str.strip(setting.text))
                 usettings.append(settings)
+                for acceptance in soup1.findAll('span', attrs={'data-test-id': 'r_c_accept_rate'}):
+                    uacceptances.append(str.strip(acceptance.text))
+                    break
 #end parsing each university page                
  
     for location in soup.findAll('div', attrs={'class': 'text-small block-tight'}):
@@ -75,7 +83,7 @@ for url in urls:
 
         
         
-print( "element len", len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings))
+print( "element len", len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings), len(uacceptances))
 #print( "colleges", names )
 
 d['Title'] = columns + list(rankingUrls.keys())
@@ -91,6 +99,7 @@ for i in range(len(ranks1)):
     d[names[i]].append(usettings[i][3])
     d[names[i]].append(usettings[i][4])
     d[names[i]].append(usettings[i][5])
+    d[names[i]].append(uacceptances[i])
     d[names[i]] += [defaultRanking]*len(rankingUrls)
 
 print("dict len", len(d))
