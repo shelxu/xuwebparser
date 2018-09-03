@@ -8,12 +8,11 @@ csv_file = open('../temp/USnewsRanking.csv', 'w', newline='')
 writer = csv.writer(csv_file)
 
 
-urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table']
-# ,\
-        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
-        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
-        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
-        # 'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table']
+urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table',\
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table']
 
 rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate', \
                 'BioMed'        : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate-biological-biomedical', \
