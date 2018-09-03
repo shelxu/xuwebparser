@@ -2,24 +2,37 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import csv
+from collections import defaultdict
 
-csv_file = open('ranking_university_USnews.csv', 'w')
+csv_file = open('ranking_university_USnews.csv', 'w', newline='')
 writer = csv.writer(csv_file)
 
-urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table']
-#,\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+2']
-#,\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+3',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+4',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+5',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+6',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+7',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+8',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+9',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+10',\
-#        'http://colleges.usnews.rankingsandreviews.com/best-colleges/rankings/national-universities/data/page+11']
-records = []
+
+urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table',\
+        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
+        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
+        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
+        'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table']
+
+rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate', \
+                'BioMed'        : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate-biological-biomedical', \
+                'Computer'      : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate-computer', \
+                'DoubleE'       : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate-electrical-electronic-communications', \
+                'BusRank'       : 'https://www.usnews.com/best-colleges/rankings/business-overall', \
+                'BusAcct'       : 'https://www.usnews.com/best-colleges/rankings/business-accounting', \
+                'BusEnt'        : 'https://www.usnews.com/best-colleges/rankings/business-entrepreneurship',\
+                'BusFin'        : 'https://www.usnews.com/best-colleges/rankings/business-finance', \
+                'BusMgmt'       : 'https://www.usnews.com/best-colleges/rankings/business-management',\
+                'BusMarketing'  : 'https://www.usnews.com/best-colleges/rankings/business-marketing',\
+                'BusOps'        : 'https://www.usnews.com/best-colleges/rankings/business-production-operations-management',\
+                'BusQuant'      : 'https://www.usnews.com/best-colleges/rankings/business-quantitative-analysis',\
+                'BusRE'         : 'https://www.usnews.com/best-colleges/rankings/business-real-estate',\
+                'BusSupply'     : 'https://www.usnews.com/best-colleges/rankings/business-supply-chain-management-logistics',
+                'LiberalArts'   : 'https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges'}
+columns = ['University','Univ Rank', 'Locations', 'URLs', 'Top Majors', 'Sector', 'Founding', 'Religion', 'Calendar', 'Setting', 'Endorsement'] 
+defaultRanking = 888
+
+d = defaultdict(list)
 ranks1 = []
 names = []
 locations = []
@@ -27,68 +40,87 @@ uurls = []
 umajors = []
 usettings = []
 
+#national rankings
 for url in urls:
-    print("shel1")
     r = requests.get(url, headers={'User-Agent':'test'})
     soup = BeautifulSoup(r.text, "lxml")
     #print(soup)
     for rank in soup.findAll('span', attrs={'class': 'text-strong'}):
-        #print("shel2",rank)
         if( "#" in rank.text ):
             ranks1.append(int(re.findall('\d+', rank.text)[0]))
-            #print(ranks1)
     for college in soup.findAll('div', attrs={'class': 'text-strong text-large block-tighter'}):
-        print("names", college)
+        #print("names", college)
         names.append(str.strip(college.text))
         for uurl in college.findAll('a', href=True):
-            #print("uurl", uurl)
             if( "best-colleges" in uurl['href']):
                 uurl1="http://colleges.usnews.rankingsandreviews.com"+str.strip(uurl['href'])
+                uurls.append(uurl1)
+
+#parsing each university page               
                 majors = []
                 settings = []
-                uurls.append(uurl1)
-                print( uurl['href'] )
- #parsing each university page               
                 r1 = requests.get(uurl1, headers={'User-Agent':'test'})
                 soup1 = BeautifulSoup(r1.text, "lxml")
-                #print("HAHAHA", soup1.encode('utf-8'))
                 for major in soup1.findAll( 'span', attrs={'class': 'flex-medium text-muted'}):
-                    #print("major", major.text)
                     majors.append(str.strip(major.text))
-                print( "majors", majors)
                 umajors.append(majors)
                 for setting in soup1.findAll('span', attrs={'class': 'heading-small text-black text-tight block-flush display-block-for-large-up'}):
                     settings.append(str.strip(setting.text))
-                print( "settings", settings)
                 usettings.append(settings)
 #end parsing each university page                
+ 
     for location in soup.findAll('div', attrs={'class': 'text-small block-tight'}):
         locations.append(str.strip(location.text))
         #print ("locations", location.text)
-#    for uurl in soup.findAll('a', href=True):
-#
-#        if( "best-colleges" in uurl['href']):
-#            uurl.append(str.strip(location.text))
-#            print( uurl.text, uurl['href'] )
 
-print( len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings))
-ranks2 = range(203, 281)
-ranks = ranks1+list(ranks2)
-print(ranks)
-#exit()
+        
+        
+print( "element len", len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings))
+#print( "colleges", names )
+
+d['Title'] = columns + list(rankingUrls.keys())
 for i in range(len(ranks1)):
-    records.append(i+1)
-    records.append(ranks1[i])
-    records.append(names[i].encode('utf-8'))
-    records.append(locations[i])
-    records.append(uurls[i])
-    records.append(umajors[i])
-    records.append(usettings[i][0])
-    records.append(usettings[i][1])
-    records.append(usettings[i][2])
-    records.append(usettings[i][3])
-    records.append(usettings[i][4])
-    records.append(usettings[i][5])
-    print(records)
-    writer.writerow(records)
-    records = []
+    d[names[i]].append(names[i])
+    d[names[i]].append(ranks1[i])
+    d[names[i]].append(locations[i])
+    d[names[i]].append(uurls[i])
+    d[names[i]].append(umajors[i])
+    d[names[i]].append(usettings[i][0])
+    d[names[i]].append(usettings[i][1])
+    d[names[i]].append(usettings[i][2])
+    d[names[i]].append(usettings[i][3])
+    d[names[i]].append(usettings[i][4])
+    d[names[i]].append(usettings[i][5])
+    d[names[i]] += [defaultRanking]*len(rankingUrls)
+
+print("dict len", len(d))
+
+#School rankings
+def parseRanking( rankurl ):
+    er = requests.get(rankurl, headers={'User-Agent':'test'})
+    souper = BeautifulSoup(er.text, "lxml")
+    erankcolls = []
+    erankings = []
+    for erank in souper.findAll('h3', attrs={'class': 'heading-large block-tighter'}):
+        coll=str.strip(erank.text)
+        erankcolls.append(coll)
+        
+    for eranking in souper.findAll('div', attrs={'style': 'margin-left: 2.5rem;'}): 
+        if( "#" in eranking.text ):
+            erankings.append(int(re.findall('\d+', eranking.text)[0]))
+    return( erankcolls, erankings )
+#End School Rankings
+
+
+j = 0
+for k, rurls in rankingUrls.items():
+    srankcolls, srankings = parseRanking( rurls )
+    for i in range(len(srankings)):
+        if( d[srankcolls[i]]):
+            values = d[srankcolls[i]]
+            values[len(columns) + j] = srankings[i]
+            d[srankcolls[i]] = values
+    j+=1
+
+for k,v in d.items():
+    writer.writerow(v)
