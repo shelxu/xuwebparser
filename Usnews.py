@@ -7,7 +7,32 @@ from collections import defaultdict
 csv_file = open('../temp/USnewsRanking.csv', 'w', newline='')
 writer = csv.writer(csv_file)
 
+#read CSV for N number of people's interests by university
+csv_interests = open('../temp/interests.csv.txt', 'r')
+reader = csv.reader(csv_interests, delimiter=',')
+line_count = 0
+intDict = defaultdict(list)
+intPeople = []
+defaultInt = 'N'
+numberPeople = 0
+for row in reader:
+    if line_count == 0:
+        row.pop(0)
+        intPeople = row
+        intPeople.append('Any Interest?')
+        line_count += 1
+    else:
+        if len(row) == 0:
+            print ("Interest File Input should be CSV file with university name as the first colummn, person interests expressed as Y or N in subsequent columns" )
+            exit()
+        college = row.pop(0)
+        intDict[college]= row 
+        if 'Y' in row:
+            intDict[college].append('Y')
+        numberPeople = len( row )
+    print(row)
 
+    
 urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table',\
          'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
          'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
@@ -85,7 +110,7 @@ for url in urls:
 print( "element len", len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings), len(uacceptances))
 #print( "colleges", names )
 
-d['Title'] = columns + list(rankingUrls.keys())
+d['Title'] = columns + list(rankingUrls.keys())+ intPeople
 for i in range(len(ranks1)):
     d[names[i]].append(names[i])
     d[names[i]].append(ranks1[i])
@@ -100,6 +125,7 @@ for i in range(len(ranks1)):
     d[names[i]].append(usettings[i][5])
     d[names[i]].append(uacceptances[i])
     d[names[i]] += [defaultRanking]*len(rankingUrls)
+    d[names[i]] += [defaultInt]*numberPeople
 
 print("dict len", len(d))
 
@@ -130,5 +156,12 @@ for k, rurls in rankingUrls.items():
             d[srankcolls[i]] = values
     j+=1
 
+for collname, interests in intDict.items():
+    if( d[collname]):
+        values = d[collname]
+        values = values[:-1*numberPeople] + interests
+        d[collname] = values
+
 for k,v in d.items():
     writer.writerow(v)
+print( intDict )
