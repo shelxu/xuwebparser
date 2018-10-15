@@ -29,6 +29,8 @@ for row in reader:
         intDict[college]= row 
         if 'Y' in row:
             intDict[college].append('Y')
+        else:
+            intDict[college].append('N')
         numberPeople = len( row )
     print(row)
 
@@ -37,7 +39,8 @@ urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mo
          'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
          'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
          'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
-         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table']
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=6&_mode=table']
 
 rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate', \
                 'BioMed'        : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate-biological-biomedical', \
