@@ -58,7 +58,7 @@ rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings
                 'BusSupply'     : 'https://www.usnews.com/best-colleges/rankings/business-supply-chain-management-logistics',
                 'LiberalArts'   : 'https://www.usnews.com/best-colleges/rankings/national-liberal-arts-colleges'}
 
-columns = ['University','Univ Rank', 'Locations', 'URLs', 'Top Majors', 'Sector', 'Founding', 'Religion', 'Calendar', 'Setting', 'Endorsement', 'Acceptance Rate']
+columns = ['University','Univ Rank', 'Locations', 'URLs', 'Top Majors', 'Sector', 'Founding', 'Religion', 'Calendar', 'Setting', 'Endorsement', 'Acceptance Rate', 'Tuition']
  
 defaultRanking = 888
 
@@ -66,6 +66,7 @@ d = defaultdict(list)
 ranks1 = []
 names = []
 locations = []
+tuitions = []
 uurls = []
 umajors = []
 usettings = []
@@ -96,6 +97,14 @@ for url in urls:
                 for major in soup1.findAll( 'span', attrs={'class': 'flex-medium text-muted'}):
                     majors.append(str.strip(major.text))
                 umajors.append(majors)
+                for tuition in soup1.findAll( 'section', attrs={'class': 'hero-stats-widget-stats' }):
+                    tuitionstart = tuition.text.find('$') + 1
+                    if( tuition.text.find('Out-of-state') > 0 ):
+                        tuitionstart = tuition.text[tuition.text.find( '$' ) + 1:].find('$') + tuition.text.find( '$' ) + 2
+                    #tuitionend = tuition.text.find('(') - 1
+                    t = tuition.text[tuitionstart:tuitionstart + 6]
+                    #print( "tuition section", t, '\n', tuition.text)
+                    tuitions.append( t )
                 for setting in soup1.findAll('span', attrs={'class': 'heading-small text-black text-tight block-flush display-block-for-large-up'}):
                     settings.append(str.strip(setting.text))
                 usettings.append(settings)
@@ -110,7 +119,7 @@ for url in urls:
 
         
         
-print( "element len", len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings), len(uacceptances))
+print( "element len", len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings), len(uacceptances), len( tuitions ))
 #print( "colleges", names )
 
 d['Title'] = columns + list(rankingUrls.keys())+ intPeople
@@ -127,6 +136,7 @@ for i in range(len(ranks1)):
     d[names[i]].append(usettings[i][4])
     d[names[i]].append(usettings[i][5])
     d[names[i]].append(uacceptances[i])
+    d[names[i]].append(tuitions[i])
     d[names[i]] += [defaultRanking]*len(rankingUrls)
     d[names[i]] += [defaultInt]*numberPeople
 
