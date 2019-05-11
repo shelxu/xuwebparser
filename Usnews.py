@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import re
 import csv
 from collections import defaultdict
+import logging
+logging.basicConfig(level=logging.WARNING, format='=====================>%(asctime)s %(message)s')
 
 csv_file = open('../temp/USnewsRanking.csv', 'w', newline='')
 writer = csv.writer(csv_file)
@@ -32,7 +34,7 @@ for row in reader:
         else:
             intDict[college].append('N')
         numberPeople = len( row )
-    print(row)
+    logging.warning(row)
 
     
 urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table',\
@@ -60,7 +62,7 @@ rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings
 
 columns = ['University','Univ Rank', 'Locations', 'URLs', 'Top Majors', 'Sector', 'Founding', 'Religion', 'Calendar', 'Setting', 'Endorsement', 'Acceptance Rate', 'Tuition']
  
-defaultRanking = 888
+defaultRanking = 300
 
 d = defaultdict(list)
 ranks1 = []
@@ -76,46 +78,50 @@ uacceptances = []
 for url in urls:
     r = requests.get(url, headers={'User-Agent':'test'})
     soup = BeautifulSoup(r.text, "lxml")
-    #print(soup)
-    for rank in soup.findAll('span', attrs={'class': 'text-strong'}):
+    for rank in soup.findAll('div', attrs={'class': 'ranklist-ranked-item RankList__Rank-s1dx9co1-2 jNcEpG'}):
+        logging.warning(rank.text)
         if( "#" in rank.text ):
             ranks1.append(int(re.findall('\d+', rank.text)[0]))
-    for college in soup.findAll('div', attrs={'class': 'text-strong text-large block-tighter'}):
-        #print("names", college)
+            logging.info( rank.text )
+	
+    for location in soup.findAll('p', attrs={'class': 'Paragraph-fqygwe-0 fJtpNK'}):
+        locations.append(str.strip(location.text))
+        logging.warning("locations")
+        logging.info(locations)
+		
+    for college in soup.findAll('h3', attrs={'class': 'sc-bdVaJa kyuLHz'}):
+        logging.warning("===COLLEGE====")
+        logging.info(str.strip(college.text))
         names.append(str.strip(college.text))
         for uurl in college.findAll('a', href=True):
-            if( "best-colleges" in uurl['href']):
-                uurl1="http://colleges.usnews.rankingsandreviews.com"+str.strip(uurl['href'])
-                uurls.append(uurl1)
+            uurl1="http://colleges.usnews.rankingsandreviews.com"+str.strip(uurl['href'])
+            uurls.append(uurl1)
+            logging.info(uurl1)
 
 #parsing each university page               
-                majors = []
-                settings = []
-                acceptances = []
-                r1 = requests.get(uurl1, headers={'User-Agent':'test'})
-                soup1 = BeautifulSoup(r1.text, "lxml")
-                for major in soup1.findAll( 'span', attrs={'class': 'flex-medium text-muted'}):
-                    majors.append(str.strip(major.text))
-                umajors.append(majors)
-                for tuition in soup1.findAll( 'section', attrs={'class': 'hero-stats-widget-stats' }):
-                    tuitionstart = tuition.text.find('$') + 1
-                    if( tuition.text.find('Out-of-state') > 0 ):
-                        tuitionstart = tuition.text[tuition.text.find( '$' ) + 1:].find('$') + tuition.text.find( '$' ) + 2
-                    #tuitionend = tuition.text.find('(') - 1
-                    t = tuition.text[tuitionstart:tuitionstart + 6]
-                    #print( "tuition section", t, '\n', tuition.text)
-                    tuitions.append( t )
-                for setting in soup1.findAll('span', attrs={'class': 'heading-small text-black text-tight block-flush display-block-for-large-up'}):
-                    settings.append(str.strip(setting.text))
-                usettings.append(settings)
-                for acceptance in soup1.findAll('span', attrs={'data-test-id': 'r_c_accept_rate'}):
-                    uacceptances.append(str.strip(acceptance.text))
-                    break
+            majors = []
+            settings = []
+            acceptances = []
+            r1 = requests.get(uurl1, headers={'User-Agent':'test'})
+            soup1 = BeautifulSoup(r1.text, "lxml")
+            for major in soup1.findAll( 'span', attrs={'class': 'flex-medium text-muted'}):
+                majors.append(str.strip(major.text))
+            umajors.append(majors)
+            for tuition in soup1.findAll( 'section', attrs={'class': 'hero-stats-widget-stats' }):
+                tuitionstart = tuition.text.find('$') + 1
+                if( tuition.text.find('Out-of-state') > 0 ):
+                    tuitionstart = tuition.text[tuition.text.find( '$' ) + 1:].find('$') + tuition.text.find( '$' ) + 2
+                #tuitionend = tuition.text.find('(') - 1
+                t = tuition.text[tuitionstart:tuitionstart + 6]
+                logging.warning( "tuition section")
+                tuitions.append( t )
+            for setting in soup1.findAll('span', attrs={'class': 'heading-small text-black text-tight block-flush display-block-for-large-up'}):
+                settings.append(str.strip(setting.text))
+            usettings.append(settings)
+            for acceptance in soup1.findAll('span', attrs={'data-test-id': 'r_c_accept_rate'}):
+                uacceptances.append(str.strip(acceptance.text))
+                break
 #end parsing each university page                
- 
-    for location in soup.findAll('div', attrs={'class': 'text-small block-tight'}):
-        locations.append(str.strip(location.text))
-        #print ("locations", location.text)
 
         
         
@@ -175,6 +181,7 @@ for collname, interests in intDict.items():
         values = values[:-1*numberPeople] + interests
         d[collname] = values
 
+logging.info(d)
 for k,v in d.items():
     writer.writerow(v)
 print( intDict )
