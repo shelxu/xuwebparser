@@ -176,11 +176,8 @@ for k, rurls in rankingUrls.items():
     logging.info( srankings )
     for i in range(len(srankings)):
         if( d[srankcolls[i]]):
-            logging.warning( "===School Rankings===" )
             values = d[srankcolls[i]]
-            logging.warning( values )
             values[len(columns) + j] = srankings[i]
-            logging.warning( values )
             d[srankcolls[i]] = values
     j+=1
 
