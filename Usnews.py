@@ -4,7 +4,7 @@ import re
 import csv
 from collections import defaultdict
 import logging
-logging.basicConfig(level=logging.WARNING, format='=====================>%(asctime)s %(message)s')
+logging.basicConfig(level=logging.WARNING, format='=====================>%(asctime)s %(lineno)-6d: %(message)s')
 
 csv_file = open('../temp/USnewsRanking.csv', 'w', newline='')
 writer = csv.writer(csv_file)
@@ -38,10 +38,10 @@ for row in reader:
 
     
 urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table',\
-         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
-         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
-         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
-         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table',
+    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
+    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
+    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
+    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table',
          'https://www.usnews.com/best-colleges/rankings/national-universities?_page=6&_mode=table']
 
 rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate', \
@@ -82,20 +82,21 @@ for url in urls:
         logging.warning(rank.text)
         if( "#" in rank.text ):
             ranks1.append(int(re.findall('\d+', rank.text)[0]))
-            logging.info( rank.text )
+            logging.info( ranks1 )
 	
     for location in soup.findAll('p', attrs={'class': 'Paragraph-fqygwe-0 fJtpNK'}):
         locations.append(str.strip(location.text))
-        logging.warning("locations")
+        logging.warning("===locations===")
         logging.info(locations)
 		
     for college in soup.findAll('h3', attrs={'class': 'sc-bdVaJa kyuLHz'}):
-        logging.warning("===COLLEGE====")
+        logging.warning("===COLLEGE===")
         logging.info(str.strip(college.text))
         names.append(str.strip(college.text))
         for uurl in college.findAll('a', href=True):
             uurl1="http://colleges.usnews.rankingsandreviews.com"+str.strip(uurl['href'])
             uurls.append(uurl1)
+            logging.warning( "===University URL===" )
             logging.info(uurl1)
 
 #parsing each university page               
@@ -113,7 +114,8 @@ for url in urls:
                     tuitionstart = tuition.text[tuition.text.find( '$' ) + 1:].find('$') + tuition.text.find( '$' ) + 2
                 #tuitionend = tuition.text.find('(') - 1
                 t = tuition.text[tuitionstart:tuitionstart + 6]
-                logging.warning( "tuition section")
+                logging.warning( "===tuition section===")
+                logging.info( t )
                 tuitions.append( t )
             for setting in soup1.findAll('span', attrs={'class': 'heading-small text-black text-tight block-flush display-block-for-large-up'}):
                 settings.append(str.strip(setting.text))
@@ -122,14 +124,16 @@ for url in urls:
                 uacceptances.append(str.strip(acceptance.text))
                 break
 #end parsing each university page                
-
-        
+logging.warning( names )
         
 print( "element len", len(ranks1), len(names), len(locations), len(uurls), len(umajors), len(usettings), len(uacceptances), len( tuitions ))
 #print( "colleges", names )
-
 d['Title'] = columns + list(rankingUrls.keys())+ intPeople
 for i in range(len(ranks1)):
+    logging.warning( i )
+    logging.info( names[i] )
+    if( d[names[i]] ):
+        continue
     d[names[i]].append(names[i])
     d[names[i]].append(ranks1[i])
     d[names[i]].append(locations[i])
@@ -145,8 +149,7 @@ for i in range(len(ranks1)):
     d[names[i]].append(tuitions[i])
     d[names[i]] += [defaultRanking]*len(rankingUrls)
     d[names[i]] += [defaultInt]*numberPeople
-
-print("dict len", len(d))
+    logging.info( d['Princeton University'] )
 
 #School rankings
 def parseRanking( rankurl ):
@@ -168,10 +171,16 @@ def parseRanking( rankurl ):
 j = 0
 for k, rurls in rankingUrls.items():
     srankcolls, srankings = parseRanking( rurls )
+    logging.warning( "===School Rankings 1===" )
+    logging.info( srankcolls )
+    logging.info( srankings )
     for i in range(len(srankings)):
         if( d[srankcolls[i]]):
+            logging.warning( "===School Rankings===" )
             values = d[srankcolls[i]]
+            logging.warning( values )
             values[len(columns) + j] = srankings[i]
+            logging.warning( values )
             d[srankcolls[i]] = values
     j+=1
 
@@ -184,4 +193,3 @@ for collname, interests in intDict.items():
 logging.info(d)
 for k,v in d.items():
     writer.writerow(v)
-print( intDict )
