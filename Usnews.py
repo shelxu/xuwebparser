@@ -38,10 +38,10 @@ for row in reader:
 
     
 urls = ['https://www.usnews.com/best-colleges/rankings/national-universities?_mode=table',\
-    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
-    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
-    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
-    #     'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=2&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=3&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=4&_mode=table',
+         'https://www.usnews.com/best-colleges/rankings/national-universities?_page=5&_mode=table',
          'https://www.usnews.com/best-colleges/rankings/national-universities?_page=6&_mode=table']
 
 rankingUrls = { 'Engineering'   : 'https://www.usnews.com/best-colleges/rankings/engineering-doctorate', \
